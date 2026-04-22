@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bio-Forget — DS307 | Privacy-Preserving Genomic Disease Detection</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <div class="dna-bg" aria-hidden="true">
+    <div class="helix-strand strand-1"></div>
+    <div class="helix-strand strand-2"></div>
+    <div class="helix-strand strand-3"></div>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand" style="display:flex;align-items:center;gap:12px">
+        <div class="brand-icon"><i class="fa-solid fa-dna"></i></div>
+        <div class="brand-text">
+          <span class="brand-name">Bio<span class="accent">Forget</span></span>
+          <span class="brand-sub">Privacy-Preserving Genomic Intelligence</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
+          <i class="fa-solid fa-gauge-high"></i><span>Dashboard</span>
+        </button>
+        <button class="nav-btn" data-view="patients" onclick="showView('patients')">
+          <i class="fa-solid fa-users"></i><span>Patients</span>
+        </button>
+        <button class="nav-btn" data-view="analyze" onclick="showView('analyze')">
+          <i class="fa-solid fa-magnifying-glass-chart"></i><span>Analyze</span>
+        </button>
+        <button class="nav-btn" data-view="unlearn" onclick="showView('unlearn')">
+          <i class="fa-solid fa-eraser"></i><span>Unlearn</span>
+        </button>
+        <button class="nav-btn" data-view="audit" onclick="showView('audit')">
+          <i class="fa-solid fa-shield-halved"></i><span>Audit</span>
+        </button>
+      </nav>
+      <!-- Model status pill -->
+      <div id="model-status-pill" class="model-pill model-pill-loading">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>Loading…</span>
+      </div>
+      <div class="header-badge">
+        <span>DS307</span><span class="badge-dot"></span><span>Spring 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <section id="view-dashboard" class="view active">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">System Dashboard</h1>
+          <p class="view-desc">Multi-gene panel · EGFR / KRAS / TP53 / ALK</p>
+        </div>
+        <div class="gene-badge">
+          <i class="fa-solid fa-circle-radiation"></i>
+          <span>EGFR · KRAS · TP53 · ALK — Cancer Biomarker Panel</span>
+        </div>
+      </div>
+
+      <!-- Model info banner -->
+      <div id="model-banner" class="model-banner hidden">
+        <div class="model-banner-left">
+          <i id="banner-icon" class="fa-solid fa-brain"></i>
+          <div>
+            <div id="banner-title" class="banner-title">Loading model info…</div>
+            <div id="banner-sub"   class="banner-sub"></div>
+          </div>
+        </div>
+        <div id="banner-shards" class="banner-shards"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card stat-blue">
+          <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-total-val">—</div>
+            <div class="stat-label">Total Patients</div>
+          </div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-cancer-val">—</div>
+            <div class="stat-label">Cancerous</div>
+          </div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-healthy-val">—</div>
+            <div class="stat-label">Healthy</div>
+          </div>
+        </div>
+        <div class="stat-card stat-amber">
+          <div class="stat-icon"><i class="fa-solid fa-user-slash"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-deleted-val">—</div>
+            <div class="stat-label">Unlearned (GDPR)</div>
+          </div>
+        </div>
+        <div class="stat-card stat-purple">
+          <div class="stat-icon"><i class="fa-solid fa-dna"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-seqlen-val">—</div>
+            <div class="stat-label">Primary Gene Length (bp)</div>
+          </div>
+        </div>
+        <div class="stat-card stat-teal">
+          <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+          <div class="stat-body">
+            <div class="stat-value" id="stat-windows-val">—</div>
+            <div class="stat-label">Sequence Windows</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info panels -->
+      <div class="info-panels">
+        <div class="info-card">
+          <div class="info-card-header"><i class="fa-solid fa-microscope"></i><h3>About Multi-Gene Cancer Markers</h3></div>
+          <p>This demo uses a 4-gene panel: <strong>EGFR</strong>, <strong>KRAS</strong>, <strong>TP53</strong>, and <strong>ALK</strong>. These genes are commonly involved in lung and other cancer pathways, and are used here to simulate healthy vs cancerous genomic profiles.</p>
+          <div class="mutation-tags">
+            <span class="mut-tag mut-red">EGFR</span>
+            <span class="mut-tag mut-orange">KRAS</span>
+            <span class="mut-tag mut-purple">TP53</span>
+            <span class="mut-tag mut-pink">ALK</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-header"><i class="fa-solid fa-shield-halved"></i><h3>SISA Unlearning Pipeline</h3></div>
+          <div class="pipeline-steps">
+            <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Shard</strong> — Training data split across 4 independent models</div></div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Isolate</strong> — Locate which shard holds the patient</div></div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Retrain</strong> — Only that 1 shard (≈4× faster)</div></div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Verify</strong> — MIA confirms data is forgotten</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow -->
+      <div class="workflow-card">
+        <div class="workflow-header"><i class="fa-solid fa-sitemap"></i> System Workflow — FASTA to Unlearned Model</div>
+        <div class="workflow-flow">
+          <div class="wf-step wf-input"><i class="fa-solid fa-file-code"></i><span>FASTA Input</span></div>
+          <div class="wf-arrow"></div>
+          <div class="wf-step wf-proc"><i class="fa-solid fa-gears"></i><span>K-mer Extraction</span></div>
+          <div class="wf-arrow"></div>
+          <div class="wf-step wf-proc"><i class="fa-solid fa-brain"></i><span>CNN Training</span></div>
+          <div class="wf-arrow"></div>
+          <div class="wf-step wf-trigger"><i class="fa-solid fa-bell"></i><span>GDPR Request</span></div>
+          <div class="wf-arrow"></div>
+          <div class="wf-step wf-forget"><i class="fa-solid fa-eraser"></i><span>SISA Unlearn</span></div>
+          <div class="wf-arrow"></div>
+          <div class="wf-step wf-verify"><i class="fa-solid fa-shield-check"></i><span>MIA Verify</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ PATIENTS ══════════════ -->
+    <section id="view-patients" class="view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Patient Registry</h1>
+          <p class="view-desc">Multi-gene sequence data — indexed by patient ID</p>
+        </div>
+        <div class="patients-controls">
+          <input type="text" id="patient-search" class="search-input" placeholder="Search patient ID…" oninput="filterPatients()"/>
+          <select id="patient-filter" class="filter-select" onchange="filterPatients()">
+            <option value="all">All Patients</option>
+            <option value="Cancerous">Cancerous</option>
+            <option value="Healthy">Healthy</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <table class="patient-table">
+          <thead>
+            <tr>
+              <th>Patient ID</th><th>Status</th><th>GC Content</th>
+              <th>Mutation Rate</th><th>Gene</th><th>Shard</th><th>Privacy</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patient-tbody">
+            <tr><td colspan="8" class="loading-row"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading patients…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════ ANALYZE ══════════════ -->
+    <section id="view-analyze" class="view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Cancer Risk Analyzer</h1>
+          <p class="view-desc">Predict cancer risk from DNA sequences via CNN + k-mer analysis</p>
+        </div>
+        <div class="gdpr-badge">
+          <i class="fa-solid fa-flask"></i>
+          <span id="analyze-model-tag">Loading model…</span>
+        </div>
+      </div>
+
+      <div class="analyze-grid">
+        <!-- Input -->
+        <div class="analyze-panel">
+          <div class="method-tabs">
+            <button class="method-tab active" onclick="switchMethod('sequence',this)">
+              <i class="fa-solid fa-dna"></i> New Sequence
+            </button>
+            <button class="method-tab" onclick="switchMethod('patient',this)">
+              <i class="fa-solid fa-hospital-user"></i> Existing Patient
+            </button>
+          </div>
+
+          <div id="method-sequence" class="method-panel active">
+            <!-- Input mode toggle -->
+            <div style="display:flex;gap:8px;margin-bottom:14px">
+              <button id="mode-text-btn" class="btn-ghost" style="font-size:12px;padding:6px 12px;border:1.5px solid var(--primary);color:var(--primary);font-weight:600" onclick="setInputMode('text')">
+                <i class="fa-solid fa-keyboard"></i> Type Sequence
+              </button>
+              <button id="mode-file-btn" class="btn-ghost" style="font-size:12px;padding:6px 12px" onclick="setInputMode('file')">
+                <i class="fa-solid fa-file-arrow-up"></i> Upload FASTA
+              </button>
+            </div>
+
+            <!-- Text input -->
+            <div id="input-text-panel" class="form-group">
+              <label class="form-label">DNA Sequence (A, C, G, T only)</label>
+              <textarea id="seq-input" class="seq-textarea" rows="7"
+                placeholder="Paste your DNA sequence here…"></textarea>
+            </div>
+
+            <!-- File upload -->
+            <div id="input-file-panel" class="form-group" style="display:none">
+              <label class="form-label">Upload FASTA File</label>
+              <label id="fasta-drop-zone" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:2px dashed var(--primary-border);border-radius:var(--radius);padding:2rem 1rem;cursor:pointer;background:var(--blue-50);transition:border-color .2s">
+                <i class="fa-solid fa-file-dna" style="font-size:28px;color:var(--primary)"></i>
+                <span id="fasta-file-name" style="font-size:13px;color:var(--text-secondary)">Click or drag .fasta / .fa file here</span>
+                <input id="fasta-file-input" type="file" accept=".fasta,.fa,.txt" style="display:none" onchange="handleFastaFile(this)"/>
+              </label>
+            </div>
+
+            <div class="analyze-actions">
+              <button class="btn-primary" onclick="analyzeSequence()"><i class="fa-solid fa-microscope"></i> Analyze Sequence</button>
+              <button class="btn-ghost" onclick="clearAnalyzeInput()"><i class="fa-solid fa-eraser"></i> Clear</button>
+            </div>
+          </div>
+
+          <div id="method-patient" class="method-panel">
+            <div class="form-group">
+              <label class="form-label">Select Patient from Registry</label>
+              <select id="quick-patient" class="filter-select" style="width:100%">
+                <option value="">— Choose a patient —</option>
+              </select>
+            </div>
+            <div style="background:var(--blue-50);border:1px solid var(--primary-border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--text-secondary);display:flex;gap:8px">
+              <i class="fa-solid fa-info-circle" style="color:var(--primary);margin-top:1px"></i>
+              <span>Pre-analyzed genomic data from multi-gene sequence windows using the trained CNN.</span>
+            </div>
+            <div class="analyze-actions">
+              <button class="btn-primary" onclick="predictPatient()"><i class="fa-solid fa-chart-line"></i> Predict Cancer Status</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="analyze-panel results-panel">
+          <div class="results-header-row">
+            <h3><i class="fa-solid fa-clipboard-list" style="color:var(--primary);margin-right:8px"></i>Prediction Results</h3>
+          </div>
+          <div class="results-body" id="analyze-result">
+            <div class="results-placeholder">
+              <i class="fa-solid fa-flask"></i>
+              <p>Analyze a sequence or select a patient<br>to see cancer risk prediction results here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </section>
+
+    <!-- ══════════════ UNLEARN ══════════════ -->
+    <section id="view-unlearn" class="view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Machine Unlearning</h1>
+          <p class="view-desc">SISA — Sharded, Isolated, Sliced, Aggregated deletion protocol</p>
+        </div>
+        <div class="gdpr-badge">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span>GDPR Article 17 — Right to Erasure</span>
+        </div>
+      </div>
+
+      <div class="unlearn-grid">
+        <!-- Form -->
+        <div class="unlearn-form-card">
+          <div class="panel-header"><i class="fa-solid fa-eraser"></i> Submit Deletion Request</div>
+          <div class="form-group" style="margin-top:1.25rem">
+            <label class="form-label">Patient ID</label>
+            <select id="forget-patient-select" class="filter-select" style="width:100%">
+              <option value="">Select patient…</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason for Deletion</label>
+            <select id="forget-reason" class="filter-select" style="width:100%">
+              <option value="GDPR Right to be Forgotten">GDPR — Right to be Forgotten</option>
+              <option value="Patient withdrawal of consent">Patient — Withdrawal of Consent</option>
+              <option value="Data breach mitigation">Security — Data Breach Mitigation</option>
+              <option value="Study termination">Study — Termination / Dropout</option>
+            </select>
+          </div>
+          <div class="warning-box">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p>This will retrain the affected SISA shard without the patient's data. <strong>This cannot be undone.</strong></p>
+          </div>
+          <div style="padding:0 1.5rem 1.5rem">
+            <button class="btn-danger" id="forget-btn" onclick="forgetPatient()" style="width:100%;justify-content:center">
+              <i class="fa-solid fa-eraser"></i> Execute Unlearning
+            </button>
+          </div>
+          <div id="unlearn-status" class="unlearn-status hidden" style="margin:0 1.5rem 1.5rem"></div>
+        </div>
+
+        <!-- SISA architecture -->
+        <div class="sisa-info-card">
+          <div class="panel-header"><i class="fa-solid fa-cube"></i> SISA Architecture — Live State</div>
+          <div class="shard-grid" id="shard-grid">
+            <div class="shard-card" id="shard-0">
+              <div class="shard-title">Shard 0</div>
+              <div class="shard-count" id="shard-0-count">— patients</div>
+              <div class="shard-bar"><div class="shard-fill" id="shard-0-fill" style="width:100%"></div></div>
+            </div>
+            <div class="shard-card" id="shard-1">
+              <div class="shard-title">Shard 1</div>
+              <div class="shard-count" id="shard-1-count">— patients</div>
+              <div class="shard-bar"><div class="shard-fill" id="shard-1-fill" style="width:100%"></div></div>
+            </div>
+            <div class="shard-card" id="shard-2">
+              <div class="shard-title">Shard 2</div>
+              <div class="shard-count" id="shard-2-count">— patients</div>
+              <div class="shard-bar"><div class="shard-fill" id="shard-2-fill" style="width:100%"></div></div>
+            </div>
+            <div class="shard-card" id="shard-3">
+              <div class="shard-title">Shard 3</div>
+              <div class="shard-count" id="shard-3-count">— patients</div>
+              <div class="shard-bar"><div class="shard-fill" id="shard-3-fill" style="width:100%"></div></div>
+            </div>
+          </div>
+          <div class="speedup-display" id="speedup-display">
+            <div class="speedup-label">SISA vs Full Retrain Speedup</div>
+            <div class="speedup-value" id="speedup-val">≈ 4×</div>
+            <div class="speedup-sub" id="speedup-sub">Only 1 of 4 shards retrained per deletion</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ AUDIT ══════════════ -->
+    <section id="view-audit" class="view">
+      <div class="view-header">
+        <div>
+          <h1 class="view-title">Privacy Audit Log</h1>
+          <p class="view-desc">Membership Inference Attack (MIA) results &amp; unlearning events</p>
+        </div>
+        <button class="btn-secondary" onclick="loadAuditLog()">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
+      </div>
+
+      <!-- MIA tester -->
+      <div class="mia-tester">
+        <div class="panel-header"><i class="fa-solid fa-user-secret"></i> Membership Inference Attack Checker</div>
+        <div class="mia-row">
+          <select id="mia-patient-select" class="filter-select" style="flex:1">
+            <option value="">Select patient for MIA check…</option>
+          </select>
+          <button class="btn-primary" onclick="runMIA()">
+            <i class="fa-solid fa-magnifying-glass"></i> Run MIA
+          </button>
+        </div>
+        <div id="mia-result" class="mia-result hidden"></div>
+      </div>
+
+      <!-- Event log -->
+      <div class="table-wrapper">
+        <div class="panel-header"><i class="fa-solid fa-list-check"></i> Unlearning Event Log</div>
+        <table class="patient-table">
+          <thead>
+            <tr>
+              <th>Event ID</th><th>Patient</th><th>Shard Retrained</th>
+              <th>Unlearn Time</th><th>Full Retrain Est.</th><th>Speedup</th>
+              <th>MIA Score</th><th>Verdict</th><th>Real?</th><th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <tr><td colspan="10" class="loading-row">No unlearning events yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal -->
+  <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
