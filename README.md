@@ -183,7 +183,7 @@ After unlearning, a Membership Inference Attack is performed. A forgotten patien
 
 ## 🎥 Demo & Presentation
 
-> 📹 **[Watch the Demo and Presentation on Google Drive](https://drive.google.com/drive/folders/1svblr6owJ0u8Exx_5UO09LT6Z27TETx3?usp=sharing)**
+> 📹 **[Watch the Demo and Presentation on Google Drive]([https://drive.google.com/drive/folders/1IXVS0b397dRaipd3avFPeI8V6lBCNzl6?usp=sharing])**
 
 ---
 
